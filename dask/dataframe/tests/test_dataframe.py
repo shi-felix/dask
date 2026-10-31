@@ -4718,6 +4718,7 @@ def test_scalar_apply_keeps_the_value_lazy():
     a graph. ``Scalar.apply`` (plus the pure-Scalar branch in
     ``map_partitions``' meta handling) keeps that decision lazy.
     """
+
     def fix_std(v):
         return 1.0 if pd.isna(v) or v == 0.0 else v
 
@@ -4728,7 +4729,10 @@ def test_scalar_apply_keeps_the_value_lazy():
     assert float(single.std().apply(fix_std, meta=1.0).compute()) == 1.0
     assert float(constant.std().apply(fix_std, meta=1.0).compute()) == 1.0
     assert (
-        abs(float(varied.std().apply(fix_std, meta=1.0).compute()) - float(varied.std().compute()))
+        abs(
+            float(varied.std().apply(fix_std, meta=1.0).compute())
+            - float(varied.std().compute())
+        )
         < 1e-12
     )
     # A caller that omits ``meta`` gets the value emulated instead.

@@ -4877,10 +4877,10 @@ class Scalar(FrameBase):
         --------
         >>> import pandas as pd
         >>> import dask.dataframe as dd
-        >>> s = dd.from_pandas(pd.Series([1.0]), npartitions=1)
+        >>> s = dd.from_pandas(pd.Series([1.0, 2.0, 3.0]), npartitions=1)
         >>> std = s.std()
-        >>> std.apply(lambda v: 1.0 if pd.isna(v) or v == 0 else v, meta=1.0)
-        dask.expr.Scalar<..., dtype=float64>
+        >>> float(std.apply(lambda v: 1.0 if pd.isna(v) or v == 0 else v, meta=1.0).compute())
+        1.0
         """
         return self.map_partitions(function, *args, meta=meta, **kwargs)
 
