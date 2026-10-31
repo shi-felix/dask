@@ -4172,14 +4172,18 @@ def _get_meta_map_partitions(args, dfs, func, kwargs, meta, parent_meta):
         meta = emulate(func, *a, udf=True, **kwargs)
         meta_is_emulated = True
         if scalar_pipeline:
-            # The emulated value is the output value itself; make_meta's
-            # pandas-object rules don't apply to plain numbers.
-            return meta
+            # The pipeline holds no pandas object, so make_meta's
+            # parent_meta dispatch (keyed on the Scalar's numpy-scalar
+            # meta) would raise; normalize with the default backend
+            # instead. This also upcasts plain Python scalars (e.g. a
+            # bottleneck-computed ``std``) to their numpy equivalents,
+            # matching what a pandas-parented pipeline produces.
+            return make_meta(meta, index=meta_index)
     else:
         if scalar_pipeline:
             # Same for a caller-supplied value: it is the output value, not a
-            # pandas object to normalize.
-            return meta
+            # pandas object to normalize against the Scalar's parent meta.
+            return make_meta(meta, index=meta_index)
         meta = make_meta(meta, index=meta_index, parent_meta=parent_meta)
         meta_is_emulated = False
 
